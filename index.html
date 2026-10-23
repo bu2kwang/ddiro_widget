@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>띠로 위젯</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff3d6;--panel:#fffaf0;--ink:#3a2a1a;--sub:#8a6f55;--hi:#ff6f91;--sky:#9ad6ff;--grass:#7bc96f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1a2b;--panel:#2a2540;--ink:#f6e9d0;--sub:#b3a5c9;--hi:#ff8fab;--sky:#35507a;--grass:#4f8f56}}
+:root[data-theme="dark"]{--bg:#1d1a2b;--panel:#2a2540;--ink:#f6e9d0;--sub:#b3a5c9;--hi:#ff8fab;--sky:#35507a;--grass:#4f8f56}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Press Start 2P",ui-monospace,Menlo,monospace;display:flex;align-items:center;justify-content:center;padding:12px}
+.card{width:100%;max-width:340px;background:var(--panel);padding:16px;box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),6px 10px 0 0 rgba(0,0,0,.18)}
+.scene{height:110px;background:var(--sky);position:relative;overflow:hidden;box-shadow:0 0 0 3px var(--ink);margin-bottom:16px}
+.scene::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22px;background:var(--grass);border-top:3px solid var(--ink)}
+canvas{position:absolute;left:50%;bottom:19px;width:112px;height:auto;margin-left:-56px;image-rendering:pixelated;animation:bob 1.2s steps(2) infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){canvas{animation:none}}
+.name{font-size:10px;text-align:center;margin:0 0 10px;color:var(--sub)}
+.time{font-size:30px;text-align:center;letter-spacing:1px;margin:0 0 10px}
+.time span{color:var(--hi)}
+.date{font-size:9px;text-align:center;color:var(--sub);margin:0 0 16px;line-height:1.6}
+.dday{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;box-shadow:0 0 0 3px var(--ink);font-size:10px}
+.dday b{font-size:16px;color:var(--hi)}
+input[type=date]{font:inherit;font-size:8px;max-width:112px;background:var(--bg);color:var(--ink);border:0;box-shadow:0 0 0 2px var(--ink);padding:4px}
+input:focus-visible{outline:3px solid var(--hi)}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="scene"><canvas id="cat" width="14" height="13" aria-label="오드아이 픽셀 강아지 띠로"></canvas></div>
+  <p class="name">TIRO</p>
+  <p class="time" id="time">00<span>:</span>00</p>
+  <p class="date" id="date"></p>
+  <div class="dday">
+    <div>D-DAY<br><b id="dd">--</b></div>
+    <input type="date" id="target" aria-label="목표 날짜">
+  </div>
+</main>
+<script>
+var G=[".B..........B.",".BB........BB.",".BIB......BIB.",".BBBBBBBBBBBB.","BBBTBBBBBBTBBB","BBBUUBBBBNNBBB","BBBBBBWWBBBBBB",".BBBBWWWWBBBB.","..BBWWOOWWBB..","..BBBWWWWBBB..","...WWWWWWWW...","..WWWWWWWWWW..","..WWW....WWW.."];
+var C={B:"#2b2b36",W:"#fffaf0",U:"#8fd3ff",N:"#7a4a22",O:"#0d0d12",T:"#c28a52",I:"#e9b7a0"},cv=document.getElementById("cat"),cx=cv.getContext("2d");
+function draw(blink){cx.clearRect(0,0,14,13);G.forEach(function(r,y){for(var x=0;x<14;x++){var c=r[x];if(c==".")continue;if((c=="U"||c=="N")&&blink)c="B";cx.fillStyle=C[c];cx.fillRect(x,y,1,1)}})}
+draw(false);
+setInterval(function(){draw(true);setTimeout(function(){draw(false)},180)},3200);
+var D=["일","월","화","수","목","금","토"];
+function p(n){return String(n).padStart(2,"0")}
+function tick(){var n=new Date();
+document.getElementById("time").innerHTML=p(n.getHours())+"<span>"+(n.getSeconds()%2?":":" ")+"</span>"+p(n.getMinutes());
+document.getElementById("date").textContent=n.getFullYear()+"."+p(n.getMonth()+1)+"."+p(n.getDate())+" ("+D[n.getDay()]+")";
+calc()}
+var t=document.getElementById("target");
+try{var s=localStorage.getItem("pxTarget");if(s)t.value=s}catch(e){}
+function calc(){var el=document.getElementById("dd");if(!t.value){el.textContent="--";return}
+var a=new Date();a.setHours(0,0,0,0);var b=new Date(t.value+"T00:00:00");
+var d=Math.round((b-a)/864e5);el.textContent=d>0?"D-"+d:d==0?"D-DAY":"D+"+(-d)}
+t.addEventListener("change",function(){try{localStorage.setItem("pxTarget",t.value)}catch(e){}calc()});
+tick();setInterval(tick,1000);
+</script>
+</body>
+</html>
